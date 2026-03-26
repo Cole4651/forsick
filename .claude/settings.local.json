@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(export PGPASSWORD='mut99Eat@!ter')",
+      "Bash(\"/c/Program Files/PostgreSQL/\"*/bin/psql)",
+      "Bash(-U postgres:*)",
+      "Bash(PGPASSWORD='mut99Eat@!ter' \"/c/Program Files/PostgreSQL/18/bin/psql\" -U postgres -h 127.0.0.1 -c \"CREATE DATABASE mini_social;\")",
+      "Bash(\"/c/Program Files/PostgreSQL/18/bin/psql\" \"postgresql://postgres:mut99Eat%40%21ter@127.0.0.1:5432/postgres\" -c \"SELECT 1;\")",
+      "Bash(\"/c/Program Files/PostgreSQL/18/bin/psql\" \"postgresql://postgres:mut99Eat%40%21ter@127.0.0.1:5432/postgres\" -c \"CREATE DATABASE mini_social;\")"
+    ]
+  }
+}
