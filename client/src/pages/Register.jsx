@@ -15,12 +15,16 @@ export default function Register() {
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
-    const res = await api.post('/api/auth/register', form);
-    const data = await res.json();
-    if (res.ok) {
-      login(data.user, data.token);
-    } else {
-      setError(data.error || 'Registration failed');
+    try {
+      const res = await api.post('/api/auth/register', form);
+      const data = await res.json();
+      if (res.ok) {
+        login(data.user, data.token);
+      } else {
+        setError(data.error || 'Registration failed');
+      }
+    } catch (err) {
+      setError('Could not connect to server');
     }
   }
 
