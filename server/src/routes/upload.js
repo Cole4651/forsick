@@ -13,7 +13,7 @@ cloudinary.config({
 
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB for videos
+  limits: { fileSize: 50 * 1024 * 1024 },
   fileFilter(req, file, cb) {
     const allowed = /jpeg|jpg|png|gif|webp|mp4|mov|avi|webm|quicktime/;
     const mime = file.mimetype.split('/')[1];
@@ -30,10 +30,7 @@ router.post('/', auth, upload.single('file'), async (req, res) => {
       const stream = cloudinary.uploader.upload_stream(
         {
           resource_type: isVideo ? 'video' : 'image',
-          folder: 'forsick',
-          transformation: isVideo
-            ? [{ quality: 'auto', fetch_format: 'mp4' }]
-            : [{ quality: 'auto', fetch_format: 'auto' }]
+          folder: 'forsick'
         },
         (err, result) => (err ? reject(err) : resolve(result))
       );
@@ -45,6 +42,7 @@ router.post('/', auth, upload.single('file'), async (req, res) => {
       type: isVideo ? 'video' : 'image'
     });
   } catch (err) {
+    console.error('Upload error:', err);
     res.status(500).json({ error: 'Upload failed' });
   }
 });
