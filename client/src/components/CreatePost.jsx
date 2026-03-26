@@ -9,6 +9,7 @@ export default function CreatePost({ onCreated }) {
   const [preview, setPreview] = useState(null);
   const [fileType, setFileType] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const fileRef = useRef();
 
   function handleFileChange(e) {
@@ -31,6 +32,7 @@ export default function CreatePost({ onCreated }) {
     e.preventDefault();
     if (!content.trim()) return;
     setLoading(true);
+    setError('');
     try {
       let mediaUrl = null;
       let mediaType = null;
@@ -42,14 +44,18 @@ export default function CreatePost({ onCreated }) {
           headers: { Authorization: `Bearer ${token}` },
           body: formData
         });
+        if (!uploadRes.ok) throw new Error('Upload failed');
         const uploadData = await uploadRes.json();
         mediaUrl = uploadData.url;
         mediaType = uploadData.type;
       }
-      await api.post('/api/posts', { content, image: mediaUrl, mediaType }, token);
+      const res = await api.post('/api/posts', { content, image: mediaUrl, mediaType }, token);
+      if (!res.ok) throw new Error('Failed to create post');
       setContent('');
       removeFile();
       if (onCreated) onCreated();
+    } catch (err) {
+      setError(err.message || 'Something went wrong');
     } finally {
       setLoading(false);
     }
@@ -64,6 +70,7 @@ export default function CreatePost({ onCreated }) {
         className="w-full resize-none border-0 focus:ring-0 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 bg-transparent outline-none"
         rows={3}
       />
+      {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
       {preview && (
         <div className="relative mb-3">
           {fileType === 'video' ? (
@@ -81,22 +88,13 @@ export default function CreatePost({ onCreated }) {
         </div>
       )}
       <div className="flex items-center justify-between">
-        <div className="flex gap-3">
-          <button
-            type="button"
-            onClick={() => { fileRef.current.accept = 'image/*'; fileRef.current?.click(); }}
-            className="text-sm text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400"
-          >
-            📷 Photo
-          </button>
-          <button
-            type="button"
-            onClick={() => { fileRef.current.accept = 'video/*'; fileRef.current?.click(); }}
-            className="text-sm text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400"
-          >
-            🎬 Video
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => fileRef.current?.click()}
+          className="text-sm text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400"
+        >
+          📎 Files
+        </button>
         <input ref={fileRef} type="file" accept="image/*,video/*" onChange={handleFileChange} className="hidden" />
         <button
           type="submit"
