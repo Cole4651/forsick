@@ -55,7 +55,7 @@ export default function CreatePost({ onCreated }) {
       removeFile();
       if (onCreated) onCreated();
     } catch (err) {
-      setError(err.message || 'Something went wrong');
+      setError('Could not connect to server. Try again.');
     } finally {
       setLoading(false);
     }

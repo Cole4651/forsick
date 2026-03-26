@@ -14,14 +14,14 @@ const uploadRoutes = require('./routes/upload');
 
 const app = express();
 const server = http.createServer(app);
-const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
+const CLIENT_URL = (process.env.CLIENT_URL || 'http://localhost:5173').replace(/\/+$/, '');
 
 const io = new Server(server, {
-  cors: { origin: CLIENT_URL, methods: ['GET', 'POST'] }
+  cors: { origin: CLIENT_URL, methods: ['GET', 'POST', 'PUT', 'DELETE'] }
 });
 
 // Middleware
-app.use(cors({ origin: CLIENT_URL }));
+app.use(cors({ origin: CLIENT_URL, methods: ['GET', 'POST', 'PUT', 'DELETE'] }));
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
