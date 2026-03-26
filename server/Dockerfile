@@ -11,7 +11,4 @@ COPY . .
 
 RUN npx prisma generate
 
-COPY start.sh ./
-RUN chmod +x start.sh
-
-CMD ["./start.sh"]
+CMD node src/index.js
