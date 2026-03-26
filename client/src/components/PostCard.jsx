@@ -43,7 +43,13 @@ export default function PostCard({ post, onUpdate }) {
 
       <Link to={`/post/${post.id}`}>
         <p className="text-gray-800 dark:text-gray-200 mb-3">{post.content}</p>
-        {post.image && <img src={post.image} alt="" className="rounded-lg mb-3 max-h-80 w-full object-cover" />}
+        {post.image && (
+          post.mediaType === 'video' ? (
+            <video src={post.image} controls className="rounded-lg mb-3 max-h-80 w-full" />
+          ) : (
+            <img src={post.image} alt="" className="rounded-lg mb-3 max-h-80 w-full object-cover" />
+          )
+        )}
       </Link>
 
       <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">

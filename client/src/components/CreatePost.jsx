@@ -5,22 +5,25 @@ import api from '../utils/api';
 export default function CreatePost({ onCreated }) {
   const { token } = useAuth();
   const [content, setContent] = useState('');
-  const [image, setImage] = useState(null);
+  const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
+  const [fileType, setFileType] = useState(null);
   const [loading, setLoading] = useState(false);
   const fileRef = useRef();
 
   function handleFileChange(e) {
-    const file = e.target.files[0];
-    if (file) {
-      setImage(file);
-      setPreview(URL.createObjectURL(file));
+    const selected = e.target.files[0];
+    if (selected) {
+      setFile(selected);
+      setPreview(URL.createObjectURL(selected));
+      setFileType(selected.type.startsWith('video/') ? 'video' : 'image');
     }
   }
 
-  function removeImage() {
-    setImage(null);
+  function removeFile() {
+    setFile(null);
     setPreview(null);
+    setFileType(null);
     if (fileRef.current) fileRef.current.value = '';
   }
 
@@ -29,21 +32,23 @@ export default function CreatePost({ onCreated }) {
     if (!content.trim()) return;
     setLoading(true);
     try {
-      let imageUrl = null;
-      if (image) {
+      let mediaUrl = null;
+      let mediaType = null;
+      if (file) {
         const formData = new FormData();
-        formData.append('image', image);
+        formData.append('file', file);
         const uploadRes = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/upload`, {
           method: 'POST',
           headers: { Authorization: `Bearer ${token}` },
           body: formData
         });
         const uploadData = await uploadRes.json();
-        imageUrl = uploadData.url;
+        mediaUrl = uploadData.url;
+        mediaType = uploadData.type;
       }
-      await api.post('/api/posts', { content, image: imageUrl }, token);
+      await api.post('/api/posts', { content, image: mediaUrl, mediaType }, token);
       setContent('');
-      removeImage();
+      removeFile();
       if (onCreated) onCreated();
     } finally {
       setLoading(false);
@@ -61,10 +66,14 @@ export default function CreatePost({ onCreated }) {
       />
       {preview && (
         <div className="relative mb-3">
-          <img src={preview} alt="Preview" className="rounded-lg max-h-60 w-full object-cover" />
+          {fileType === 'video' ? (
+            <video src={preview} controls className="rounded-lg max-h-60 w-full" />
+          ) : (
+            <img src={preview} alt="Preview" className="rounded-lg max-h-60 w-full object-cover" />
+          )}
           <button
             type="button"
-            onClick={removeImage}
+            onClick={removeFile}
             className="absolute top-2 right-2 bg-black/60 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-black/80"
           >
             X
@@ -72,20 +81,29 @@ export default function CreatePost({ onCreated }) {
         </div>
       )}
       <div className="flex items-center justify-between">
-        <button
-          type="button"
-          onClick={() => fileRef.current?.click()}
-          className="text-sm text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400"
-        >
-          📷 Photo
-        </button>
-        <input ref={fileRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={() => { fileRef.current.accept = 'image/*'; fileRef.current?.click(); }}
+            className="text-sm text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400"
+          >
+            📷 Photo
+          </button>
+          <button
+            type="button"
+            onClick={() => { fileRef.current.accept = 'video/*'; fileRef.current?.click(); }}
+            className="text-sm text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400"
+          >
+            🎬 Video
+          </button>
+        </div>
+        <input ref={fileRef} type="file" accept="image/*,video/*" onChange={handleFileChange} className="hidden" />
         <button
           type="submit"
           disabled={!content.trim() || loading}
           className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-50"
         >
-          {loading ? 'Posting...' : 'Post'}
+          {loading ? 'Uploading...' : 'Post'}
         </button>
       </div>
     </form>

@@ -78,9 +78,9 @@ router.get('/:id', async (req, res) => {
 // Create post
 router.post('/', auth, async (req, res) => {
   try {
-    const { content, image } = req.body;
+    const { content, image, mediaType } = req.body;
     const post = await prisma.post.create({
-      data: { content, image, authorId: req.userId },
+      data: { content, image, mediaType, authorId: req.userId },
       include: {
         author: { select: { id: true, username: true, name: true, avatar: true } },
         _count: { select: { comments: true, likes: true } }

@@ -38,7 +38,7 @@ export default function Profile() {
     setUploading(true);
     try {
       const formData = new FormData();
-      formData.append('image', file);
+      formData.append('file', file);
       const uploadRes = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/upload`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
